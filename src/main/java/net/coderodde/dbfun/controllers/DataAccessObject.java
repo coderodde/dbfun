@@ -25,17 +25,6 @@ public final class DataAccessObject {
             "(?, ?, ?);";
 
     /**
-     * Creates a new database if not already created.
-     */
-    private static final String CREATE_DATABASE_SQL = 
-            "CREATE DATABASE IF NOT EXISTS funny_db;";
-
-    /**
-     * Switches to 'funny_db'.
-     */
-    private static final String USE_DATABASE_SQL = "USE funny_db";
-
-    /**
      * Creates the table if not already created.
      */
     private static final String CREATE_TABLE_SQL =
@@ -113,8 +102,8 @@ public final class DataAccessObject {
     public void createDatabase() {
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(CREATE_DATABASE_SQL);
-                statement.executeUpdate(USE_DATABASE_SQL);
+//                statement.executeUpdate(CREATE_DATABASE_SQL);
+//                statement.executeUpdate(USE_DATABASE_SQL);e
                 statement.executeUpdate(CREATE_TABLE_SQL);
             }
         } catch (SQLException | URISyntaxException ex) {

@@ -33,7 +33,7 @@ public class CreateDatabaseController extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             try {
                 DataAccessObject.instance().createDatabase();
-                out.println("Database created!");
+                out.println("Database set up!");
             } catch (RuntimeException ex) {
                 out.println("Error: " + ex.getCause().getMessage());
             }

@@ -70,7 +70,7 @@ public class ShowPersonController extends HttpServlet {
             }
 
             if (!person.getFirstName().equals(matchFirstName)) {
-                response.sendRedirect("/DBWebFun/show/" + id + "/" + 
+                response.sendRedirect("/show/" + id + "/" + 
                                       person.getFirstName());
                 return;
             }
