@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class provides data access.
@@ -18,29 +20,75 @@ import java.sql.Statement;
 public final class DataAccessObject {
 
     /**
+     * The name of the column holding the ID.
+     */
+    private static final String ID_COLUMN = "id";
+    
+    /**
+     * The name of the column holding the first name.
+     */
+    private static final String FIRST_NAME_COLUMN = "first_name";
+    
+    /**
+     * The name of the column holding the last name.
+     */
+    private static final String LAST_NAME_COLUMN = "last_name";
+    
+    /**
+     * The name of the column holding the email address.
+     */
+    private static final String EMAIL_COLUMN = "email";
+    
+    /**
+     * The name of the column holding the creating time stamp.
+     */
+    private static final String CREATED_COLUMN = "created";
+    
+    /**
+     * The name of the table holding the users.
+     */
+    private static final String PERSON_TABLE_NAME = "funny_persons";
+    
+    /**
      * The SQL command for inserting a person.
      */
     private static final String INSERT_PERSON_SQL = 
-            "INSERT INTO funny_persons (first_name, last_name, email) VALUES " +
-            "(?, ?, ?);";
+            "INSERT INTO " + PERSON_TABLE_NAME + " (" +
+            FIRST_NAME_COLUMN + ", " +
+            LAST_NAME_COLUMN + ", " + 
+            EMAIL_COLUMN + ") VALUES (?, ?, ?);";
 
     /**
      * Creates the table if not already created.
      */
     private static final String CREATE_TABLE_SQL =
-            "CREATE TABLE IF NOT EXISTS funny_persons (\n" +
-                "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n" +
-                "first_name VARCHAR(40) NOT NULL,\n" +
-                "last_name VARCHAR(40) NOT NULL,\n" +
-                "email VARCHAR(50) NOT NULL,\n" +
-                "created TIMESTAMP);";
+            "CREATE TABLE IF NOT EXISTS " + PERSON_TABLE_NAME + " (\n" +
+                ID_COLUMN         + " INT(6) UNSIGNED " + 
+                                    "AUTO_INCREMENT PRIMARY KEY,\n" +
+                FIRST_NAME_COLUMN + " VARCHAR(40) NOT NULL,\n" +
+                LAST_NAME_COLUMN  + " VARCHAR(40) NOT NULL,\n" +
+                EMAIL_COLUMN      + " VARCHAR(50) NOT NULL,\n" +
+                CREATED_COLUMN    + " TIMESTAMP);";
 
     /**
-     * The SQL for selecting a user given his/her ID.
+     * The SQL command for selecting a user given his/her ID.
      */
     private static final String GET_USER_BY_ID_SQL = 
-            "SELECT * FROM funny_persons WHERE id = ?;";
+            "SELECT * FROM " + PERSON_TABLE_NAME + " WHERE " +
+            ID_COLUMN + " = ?;";
 
+    /**
+     * The SQL command for selecting all users.
+     */
+    private static final String GET_ALL_USERS = 
+            "SELECT * FROM " + PERSON_TABLE_NAME + ";";
+    
+    /**
+     * The SQL command for getting the number of users.
+     */
+    private static final String GET_NUMBER_OF_USERS = 
+            "SELECT COUNT(*) FROM " + PERSON_TABLE_NAME + ";";
+    
     static {
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -102,8 +150,6 @@ public final class DataAccessObject {
     public void createDatabase() {
         try (Connection connection = getConnection()) {
             try (Statement statement = connection.createStatement()) {
-//                statement.executeUpdate(CREATE_DATABASE_SQL);
-//                statement.executeUpdate(USE_DATABASE_SQL);e
                 statement.executeUpdate(CREATE_TABLE_SQL);
             }
         } catch (SQLException | URISyntaxException ex) {
@@ -111,6 +157,41 @@ public final class DataAccessObject {
         }
     }
 
+    /**
+     * This method returns the list of all users in the database.
+     * 
+     * @return the list of all persons.
+     */
+    public List<Person> getAllUsers() {
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(GET_ALL_USERS)) {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    List<Person> persons = new ArrayList<>(getNumberOfUsers());
+                    
+                    while (resultSet.next()) {
+                        Person person = new Person();
+                        
+                        person.setId(resultSet.getInt(ID_COLUMN));
+                        person.setFirstName(
+                                resultSet.getString(FIRST_NAME_COLUMN));
+                        
+                        person.setLastName(
+                                resultSet.getString(LAST_NAME_COLUMN));
+                        
+                        person.setEmail(resultSet.getString(EMAIL_COLUMN));
+                        person.setCreated(resultSet.getDate(CREATED_COLUMN));
+                        
+                        persons.add(person);
+                    }
+                    
+                    return persons;
+                }
+            }
+        } catch (SQLException | URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
     /**
      * Gets a user by his/her ID.
      * 
@@ -143,5 +224,24 @@ public final class DataAccessObject {
         } catch (SQLException | URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    /**
+     * Gets the number of users in the database.
+     * 
+     * @return the number of users.
+     */
+    private int getNumberOfUsers() {
+        try (Connection connection = getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet resultSet = 
+                        statement.executeQuery(GET_NUMBER_OF_USERS)) {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException | URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        } 
     }
 }

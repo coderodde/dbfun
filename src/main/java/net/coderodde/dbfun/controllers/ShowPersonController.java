@@ -30,22 +30,24 @@ public class ShowPersonController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/plain;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
             String path = request.getPathInfo();
-
+            
+            if (path == null || path.equals("/")) {
+                Gson gson = new Gson();
+                out.println(
+                        gson.toJson(
+                                DataAccessObject.instance().getAllUsers()));
+                return;
+            }
+            
             if (path.startsWith("/")) {
                 path = path.substring(1);
             }
-
+            
             String[] tokens = path.split("/");
-
-            if (tokens.length == 0) {
-                out.println("Error: At least the user ID is required.");
-                return;
-            }
-
             String idString = tokens[0];
             int id = -1;
 
