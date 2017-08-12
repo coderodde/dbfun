@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Play!</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <p id="json_paragraph">
+            
+        </p>
+        <script>
+            var jsonData;
+            // Prepare:
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    json = xhr.responseText;
+                    handleValidResponse(json);
+                }
+            };           
+            
+            // Send:
+            xhr.open("GET", "/show", true);
+            xhr.send();
+            
+            function handleValidResponse(json) {
+                if (json) {
+                    console.log("Response text: " + json);
+                    jsonData = JSON.parse(json);
+                    console.log(jsonData);
+                    document.getElementById("json_paragraph").innerHTML =
+                            "<pre><code>" + json + "</code></pre>";
+                } else {
+                    alert("Something wrong.");
+                }
+            }
+        </script>
+    </body>
+</html>
