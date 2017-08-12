@@ -36,5 +36,40 @@
                 }
             }
         </script>
+        
+        <form>
+            <input type="text" name="first_name">
+            <input type="text" name="last_name">
+            <input type="email" name="email">
+        </form>
+        
+        <script>
+            function send() {
+                var form = document.getElementsByTagName("form")[0];
+                var firstName = form.elements['first_name'].value;
+                var lastName = form.elements['last_name'].value;
+                var email = form.elements['email'].value;
+                
+                alert(firstName + " " + lastName + " " + email);
+                
+                var xhr = new XMLHttpRequest();
+                var url = "/add_person";
+                var params = encodeURI("first_name=" + firstName + 
+                        "&last_name=" + lastName + 
+                        "&email=" + email);
+                
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-type", 
+                                     "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        alert(xhr.responseText);
+                    }
+                }
+                xhr.send(params);
+            }
+        </script>
+        
+        <button id="submit_button" onclick="send()">Submit</button>
     </body>
 </html>
